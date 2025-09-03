@@ -6,10 +6,10 @@
 <title>Luciano Bike</title>
 <style>
 :root {
-  --primary:#00aaff; /* azul principal */
-  --secondary:#001f3f; /* azul escuro */
-  --light:#000; /* fundo preto */
-  --dark:#f8f9fa; /* texto claro */
+  --primary:#00aaff; 
+  --secondary:#001f3f; 
+  --light:#000; 
+  --dark:#f8f9fa; 
   --shadow:0 4px 8px rgba(0,0,0,0.3);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -44,6 +44,12 @@ h2{margin-bottom:16px;color:var(--primary);}
 .cart-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:0.9rem;}
 .cart-total{margin-top:auto;font-weight:700;font-size:18px;}
 #whatsapp-btn{position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;padding:14px;border-radius:50%;box-shadow:var(--shadow);font-size:24px;cursor:pointer;z-index:2100;}
+/* seção customizada */
+.custom-bike{margin-top:40px;padding:20px;background:#111;border-radius:12px;box-shadow:var(--shadow);}
+.custom-bike h2{color:var(--primary);}
+.custom-bike label{display:block;margin-top:10px;}
+.custom-bike input,.custom-bike textarea{width:100%;padding:8px;margin-top:4px;border-radius:6px;border:1px solid #444;background:#222;color:white;}
+.custom-bike button{margin-top:12px;}
 @media(max-width:600px){ header h1{font-size:1.2rem;} .product-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));} }
 </style>
 </head>
@@ -54,6 +60,7 @@ h2{margin-bottom:16px;color:var(--primary);}
 <nav>
 <a href="#home">Home</a>
 <a href="#produtos">Produtos</a>
+<a href="#custom">Bike Customizada</a>
 <a href="#sobre">Sobre</a>
 <a href="#politicas">Políticas</a>
 <a href="#contato">Contato</a>
@@ -85,6 +92,23 @@ h2{margin-bottom:16px;color:var(--primary);}
 </div>
 <div class="product-grid" id="productGrid"></div>
 </section>
+
+<!-- 🔵 Bike Customizada -->
+<section id="custom" class="custom-bike">
+<h2>Monte sua Bike Customizada</h2>
+<p>Preencha abaixo os detalhes da sua bike personalizada e envie direto para o WhatsApp:</p>
+<label for="customModel">Modelo desejado:</label>
+<input type="text" id="customModel" placeholder="Ex: Speed, Mountain, Urbana">
+
+<label for="customColor">Cor:</label>
+<input type="text" id="customColor" placeholder="Ex: Azul, Preto fosco, Vermelho">
+
+<label for="customExtras">Extras / Acessórios:</label>
+<textarea id="customExtras" rows="3" placeholder="Ex: Rodas de carbono, selim especial, iluminação LED"></textarea>
+
+<button class="btn btn-primary" onclick="sendCustomBike()">Enviar Pedido no WhatsApp</button>
+</section>
+
 </main>
 
 <div id="cart-overlay"></div>
@@ -232,7 +256,18 @@ document.getElementById('checkoutBtn').addEventListener('click',()=>{
   window.open(`https://wa.me/5500000000000?text=${msg}`,'_blank');
 });
 
+// Botão flutuante WhatsApp
 document.getElementById('whatsapp-btn').addEventListener('click',()=>window.open('https://wa.me/5500000000000','_blank'));
+
+// Custom bike WhatsApp
+function sendCustomBike(){
+  const model=document.getElementById('customModel').value || "Não informado";
+  const color=document.getElementById('customColor').value || "Não informado";
+  const extras=document.getElementById('customExtras').value || "Nenhum";
+  let msg=`Olá, gostaria de montar uma bike personalizada:%0A- Modelo: ${model}%0A- Cor: ${color}%0A- Extras: ${extras}`;
+  window.open(`https://wa.me/5500000000000?text=${msg}`,'_blank');
+}
+
 searchInput.addEventListener('input',renderProducts);
 filterCategory.addEventListener('change',renderProducts);
 filterAge.addEventListener('change',renderProducts);
