@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EnzoBrinquedos</title>
+<style>
+:root {
+  --primary:#ff4081; --secondary:#4a90e2; --light:#f8f9fa; --dark:#1e293b; --shadow:0 4px 8px rgba(0,0,0,0.1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:var(--light);color:var(--dark);line-height:1.6;}
+header{background:var(--primary);color:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);}
+header h1{font-size:1.5rem;}
+nav a{color:white;margin-left:16px;text-decoration:none;font-weight:bold;}
+nav a:hover{text-decoration:underline;}
+main{padding:20px;}
+h2{margin-bottom:16px;color:var(--secondary);}
+.filters{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;}
+.filters input,.filters select{padding:6px;border:1px solid #ccc;border-radius:6px;}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
+.card{background:white;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;transition:transform 0.2s;position:relative;}
+.card:hover{transform:scale(1.02);}
+.card img{width:100%;height:180px;object-fit:cover;}
+.card-body{padding:12px;}
+.card-body h3{font-size:1.1rem;margin-bottom:4px;}
+.card-body .categoria{font-size:0.85rem;color:#555;margin-bottom:2px;}
+.card-body .idade{font-size:0.8rem;color:#777;margin-bottom:6px;}
+.card-body .price{color:var(--primary);font-weight:bold;margin-bottom:6px;}
+.card-body p.estoque{font-size:0.8rem;margin-bottom:6px;}
+.btn{display:inline-block;padding:8px 12px;border:none;border-radius:8px;cursor:pointer;text-align:center;}
+.btn-primary{background:var(--primary);color:white;}
+.btn-primary:disabled{background-color:#f08080;cursor:not-allowed;}
+.low-stock{background:#fff3cd;color:#856404;padding:4px 6px;border-radius:6px;font-size:0.8rem;position:absolute;top:10px;left:10px;}
+#cart-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(2px);opacity:0;visibility:hidden;transition:opacity 0.3s;z-index:1999;}
+#cart-overlay.open{opacity:1;visibility:visible;}
+#cart{position:fixed;top:0;right:-100%;width:100%;max-width:360px;height:100%;background:white;box-shadow:var(--shadow);padding:16px;flex-direction:column;transition:right 0.3s;z-index:2000;display:flex;overflow-y:auto;}
+#cart.open{right:0;}
+#cart h3{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.cart-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:0.9rem;}
+.cart-total{margin-top:auto;font-weight:700;font-size:18px;}
+#whatsapp-btn{position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;padding:14px;border-radius:50%;box-shadow:var(--shadow);font-size:24px;cursor:pointer;z-index:2100;}
+@media(max-width:600px){ header h1{font-size:1.2rem;} .product-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));} }
+</style>
+</head>
+<body>
+
+<header>
+<h1>EnzoBrinquedos</h1>
+<nav>
+<a href="#home">Home</a>
+<a href="#produtos">Produtos</a>
+<a href="#sobre">Sobre</a>
+<a href="#politicas">Políticas</a>
+<a href="#contato">Contato</a>
+<a href="javascript:void(0)" id="openCart">🛒 Carrinho</a>
+</nav>
+</header>
+
+<main>
+<section id="home">
+<h2>Bem-vindo à EnzoBrinquedos</h2>
+<p>Os melhores brinquedos para a diversão e imaginação das crianças!</p>
+</section>
+
+<section id="produtos">
+<h2>Nossos Produtos</h2>
+<div class="filters">
+<input type="text" id="searchInput" placeholder="Buscar produto...">
+<select id="filterCategory">
+<option value="">Categoria</option>
+<option value="Bonecas">Bonecas</option>
+<option value="Pelúcia">Pelúcia</option>
+</select>
+<select id="filterAge">
+<option value="">Idade</option>
+<option value="3-5">3-5 anos</option>
+<option value="6-8">6-8 anos</option>
+</select>
+</div>
+<div class="product-grid" id="productGrid"></div>
+</section>
+</main>
+
+<div id="cart-overlay"></div>
+<div id="cart">
+<h3>Carrinho <button id="closeCart">✖</button></h3>
+<div id="cart-items"></div>
+<div class="cart-total" id="cart-total">Total: R$ 0,00</div>
+<button class="btn btn-primary" id="checkoutBtn">Finalizar no WhatsApp</button>
+</div>
+
+<div id="whatsapp-btn">💬</div>
+
+<script>
+let products = [];
+const state = { cart:{} };
+const productGrid=document.getElementById('productGrid');
+const searchInput=document.getElementById('searchInput');
+const filterCategory=document.getElementById('filterCategory');
+const filterAge=document.getElementById('filterAge');
+const cartItems=document.getElementById('cart-items');
+const cartTotal=document.getElementById('cart-total');
+
+function formatBRL(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+
+async function loadProducts(){
+  try {
+    const res = await fetch('./produtos.json');
+    products = await res.json();
+    renderProducts();
+  } catch(err){
+    console.error("Erro ao carregar produtos:", err);
+  }
+}
+
+function renderProducts(){
+  const search=searchInput.value.toLowerCase();
+  const cat=filterCategory.value;
+  const age=filterAge.value;
+  productGrid.innerHTML='';
+
+  products.filter(p=>
+    (!search||p.nome.toLowerCase().includes(search)) &&
+    (!cat||p.categoria===cat) &&
+    (!age||p.age===age)
+  ).forEach(p=>{
+    const div=document.createElement('div');
+    div.className='card';
+    let lowStockHTML=p.quantidade>0 && p.quantidade<=5?'<div class="low-stock">Estoque baixo!</div>':'';
+    let btnText=p.quantidade>0?'Comprar':'Esgotado';
+    div.innerHTML=`
+      ${lowStockHTML}
+      <img src="${p.img}" alt="${p.nome}">
+      <div class="card-body">
+        <h3>${p.nome}</h3>
+        <div class="categoria">${p.categoria}</div>
+        <div class="idade">${p.age} anos</div>
+        <div class="price">${formatBRL(p.preco)}</div>
+        <p class="estoque" id="estoque-${p.id}">Estoque: ${p.quantidade}</p>
+        <button class="btn btn-primary" id="btn-${p.id}" ${p.quantidade>0?'':'disabled'}>${btnText}</button>
+      </div>`;
+    productGrid.appendChild(div);
+    const btn=div.querySelector(`#btn-${p.id}`);
+    btn.addEventListener('click',()=>addToCart(p.id));
+  });
+}
+
+function addToCart(id){
+  const p = products.find(x=>x.id===id);
+  if(!p || p.quantidade<=0){ alert("Produto esgotado!"); return; }
+  if(!state.cart[id]) state.cart[id] = {...p, qty:1};
+  else if(state.cart[id].qty < p.quantidade) state.cart[id].qty++;
+  else { alert("Quantidade máxima em estoque atingida!"); return; }
+  p.quantidade--;
+  updateProductCard(id);
+  renderCart();
+}
+
+function updateProductCard(id){
+  const p = products.find(x=>x.id===id);
+  const estoqueEl = document.getElementById(`estoque-${id}`);
+  const btn = document.getElementById(`btn-${id}`);
+  if(estoqueEl) estoqueEl.textContent = `Estoque: ${p.quantidade}`;
+  if(btn){
+    btn.disabled = p.quantidade <=0;
+    btn.textContent = p.quantidade>0 ? 'Comprar' : 'Esgotado';
+  }
+}
+
+function changeQty(id,delta){
+  const p = products.find(x=>x.id===id);
+  if(!state.cart[id]) return;
+  if(delta>0 && p.quantidade<=0){ alert("Sem estoque disponível!"); return; }
+  state.cart[id].qty += delta;
+  p.quantidade -= delta;
+  if(state.cart[id].qty <=0){ delete state.cart[id]; p.quantidade += 0; }
+  updateProductCard(id);
+  renderCart();
+}
+
+function removeFromCart(id){
+  const p = products.find(x=>x.id===id);
+  if(state.cart[id]) p.quantidade += state.cart[id].qty;
+  delete state.cart[id];
+  updateProductCard(id);
+  renderCart();
+}
+
+function renderCart(){
+  cartItems.innerHTML='';
+  let total=0;
+  for(let id in state.cart){
+    const p=state.cart[id];
+    total+=p.preco*p.qty;
+    const div=document.createElement('div');div.className='cart-item';
+    div.innerHTML=`<div><strong>${p.nome}</strong><br>${formatBRL(p.preco)} x ${p.qty}</div>
+      <div>
+        <button onclick="changeQty('${id}',-1)">-</button>
+        <span>${p.qty}</span>
+        <button onclick="changeQty('${id}',1)">+</button>
+        <button onclick="removeFromCart('${id}')">🗑️</button>
+      </div>`;
+    cartItems.appendChild(div);
+  }
+  cartTotal.textContent=`Total: ${formatBRL(total)}`;
+}
+
+// Carrinho
+const cartOverlay=document.getElementById('cart-overlay');
+const cartEl=document.getElementById('cart');
+document.getElementById('openCart').addEventListener('click',()=>{cartEl.classList.add('open');cartOverlay.classList.add('open');});
+document.getElementById('closeCart').addEventListener('click',()=>closeCart());
+cartOverlay.addEventListener('click',()=>closeCart());
+function closeCart(){cartEl.classList.remove('open');cartOverlay.classList.remove('open');}
+
+// Checkout WhatsApp
+document.getElementById('checkoutBtn').addEventListener('click',()=>{
+  let msg='Olá, gostaria de finalizar a compra:%0A';
+  let total=0;
+  for(let id in state.cart){
+    const p=state.cart[id];
+    total+=p.preco*p.qty;
+    msg+=`- ${p.nome} x${p.qty} = ${formatBRL(p.preco*p.qty)}%0A`;
+  }
+  msg+=`Total: ${formatBRL(total)}`;
+  window.open(`https://wa.me/5500000000000?text=${msg}`,'_blank');
+});
+
+document.getElementById('whatsapp-btn').addEventListener('click',()=>window.open('https://wa.me/5500000000000','_blank'));
+searchInput.addEventListener('input',renderProducts);
+filterCategory.addEventListener('change',renderProducts);
+filterAge.addEventListener('change',renderProducts);
+
+// Carrega produtos ao abrir a página e atualiza a cada 30s
+loadProducts();
+setInterval(loadProducts,30000);
+
+</script>
+</body>
+</html>
