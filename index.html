@@ -3,38 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EnzoBrinquedos</title>
+<title>Luciano Bike</title>
 <style>
 :root {
-  --primary:#ff4081; --secondary:#4a90e2; --light:#f8f9fa; --dark:#1e293b; --shadow:0 4px 8px rgba(0,0,0,0.1);
+  --primary:#00aaff; /* azul principal */
+  --secondary:#001f3f; /* azul escuro */
+  --light:#000; /* fundo preto */
+  --dark:#f8f9fa; /* texto claro */
+  --shadow:0 4px 8px rgba(0,0,0,0.3);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Arial,sans-serif;background:var(--light);color:var(--dark);line-height:1.6;}
-header{background:var(--primary);color:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);}
-header h1{font-size:1.5rem;}
+header{background:var(--secondary);color:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);}
+header h1{font-size:1.5rem;color:var(--primary);}
 nav a{color:white;margin-left:16px;text-decoration:none;font-weight:bold;}
-nav a:hover{text-decoration:underline;}
+nav a:hover{color:var(--primary);}
 main{padding:20px;}
-h2{margin-bottom:16px;color:var(--secondary);}
+h2{margin-bottom:16px;color:var(--primary);}
 .filters{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;}
 .filters input,.filters select{padding:6px;border:1px solid #ccc;border-radius:6px;}
 .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
-.card{background:white;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;transition:transform 0.2s;position:relative;}
+.card{background:#111;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;transition:transform 0.2s;position:relative;color:white;}
 .card:hover{transform:scale(1.02);}
 .card img{width:100%;height:180px;object-fit:cover;}
 .card-body{padding:12px;}
-.card-body h3{font-size:1.1rem;margin-bottom:4px;}
-.card-body .categoria{font-size:0.85rem;color:#555;margin-bottom:2px;}
-.card-body .idade{font-size:0.8rem;color:#777;margin-bottom:6px;}
+.card-body h3{font-size:1.1rem;margin-bottom:4px;color:var(--primary);}
+.card-body .categoria{font-size:0.85rem;color:#ccc;margin-bottom:2px;}
+.card-body .idade{font-size:0.8rem;color:#aaa;margin-bottom:6px;}
 .card-body .price{color:var(--primary);font-weight:bold;margin-bottom:6px;}
 .card-body p.estoque{font-size:0.8rem;margin-bottom:6px;}
 .btn{display:inline-block;padding:8px 12px;border:none;border-radius:8px;cursor:pointer;text-align:center;}
 .btn-primary{background:var(--primary);color:white;}
-.btn-primary:disabled{background-color:#f08080;cursor:not-allowed;}
+.btn-primary:disabled{background-color:#555;cursor:not-allowed;}
 .low-stock{background:#fff3cd;color:#856404;padding:4px 6px;border-radius:6px;font-size:0.8rem;position:absolute;top:10px;left:10px;}
 #cart-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(2px);opacity:0;visibility:hidden;transition:opacity 0.3s;z-index:1999;}
 #cart-overlay.open{opacity:1;visibility:visible;}
-#cart{position:fixed;top:0;right:-100%;width:100%;max-width:360px;height:100%;background:white;box-shadow:var(--shadow);padding:16px;flex-direction:column;transition:right 0.3s;z-index:2000;display:flex;overflow-y:auto;}
+#cart{position:fixed;top:0;right:-100%;width:100%;max-width:360px;height:100%;background:#111;color:white;box-shadow:var(--shadow);padding:16px;flex-direction:column;transition:right 0.3s;z-index:2000;display:flex;overflow-y:auto;}
 #cart.open{right:0;}
 #cart h3{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
 .cart-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:0.9rem;}
@@ -46,7 +50,7 @@ h2{margin-bottom:16px;color:var(--secondary);}
 <body>
 
 <header>
-<h1>EnzoBrinquedos</h1>
+<h1>Luciano Bike</h1>
 <nav>
 <a href="#home">Home</a>
 <a href="#produtos">Produtos</a>
@@ -59,8 +63,8 @@ h2{margin-bottom:16px;color:var(--secondary);}
 
 <main>
 <section id="home">
-<h2>Bem-vindo à EnzoBrinquedos</h2>
-<p>Os melhores brinquedos para a diversão e imaginação das crianças!</p>
+<h2>Bem-vindo à Luciano Bike</h2>
+<p>As melhores bicicletas e acessórios para você pedalar com estilo e segurança!</p>
 </section>
 
 <section id="produtos">
@@ -69,13 +73,14 @@ h2{margin-bottom:16px;color:var(--secondary);}
 <input type="text" id="searchInput" placeholder="Buscar produto...">
 <select id="filterCategory">
 <option value="">Categoria</option>
-<option value="Bonecas">Bonecas</option>
-<option value="Pelúcia">Pelúcia</option>
+<option value="Speed">Speed</option>
+<option value="Mountain">Mountain</option>
+<option value="Acessórios">Acessórios</option>
 </select>
 <select id="filterAge">
-<option value="">Idade</option>
-<option value="3-5">3-5 anos</option>
-<option value="6-8">6-8 anos</option>
+<option value="">Indicação de idade</option>
+<option value="adulto">Adulto</option>
+<option value="infantil">Infantil</option>
 </select>
 </div>
 <div class="product-grid" id="productGrid"></div>
@@ -135,7 +140,7 @@ function renderProducts(){
       <div class="card-body">
         <h3>${p.nome}</h3>
         <div class="categoria">${p.categoria}</div>
-        <div class="idade">${p.age} anos</div>
+        <div class="idade">${p.age}</div>
         <div class="price">${formatBRL(p.preco)}</div>
         <p class="estoque" id="estoque-${p.id}">Estoque: ${p.quantidade}</p>
         <button class="btn btn-primary" id="btn-${p.id}" ${p.quantidade>0?'':'disabled'}>${btnText}</button>
@@ -174,7 +179,7 @@ function changeQty(id,delta){
   if(delta>0 && p.quantidade<=0){ alert("Sem estoque disponível!"); return; }
   state.cart[id].qty += delta;
   p.quantidade -= delta;
-  if(state.cart[id].qty <=0){ delete state.cart[id]; p.quantidade += 0; }
+  if(state.cart[id].qty <=0){ delete state.cart[id]; }
   updateProductCard(id);
   renderCart();
 }
@@ -235,7 +240,6 @@ filterAge.addEventListener('change',renderProducts);
 // Carrega produtos ao abrir a página e atualiza a cada 30s
 loadProducts();
 setInterval(loadProducts,30000);
-
 </script>
 </body>
 </html>
